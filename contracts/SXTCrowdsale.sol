@@ -384,6 +384,7 @@ contract SXTCrowdsale is Ownable, Crowdsale, MintableToken {
         uint256 currentTokenRate = 0;
         //uint256 currentDate = now;
         uint256 currentDate = 1518307199; // 10 Feb 2018
+        //uint256 currentDate =  1519603499; // 26 Feb 2018
         require(currentDate >= startTime);
 
         if (currentDate >= startTime && currentDate < endTimeStageOne) {
