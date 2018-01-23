@@ -288,11 +288,11 @@ contract Crowdsale is Ownable  {
     uint256 public weiRaised;
     uint256 public tokenAllocated;
 	uint256 public cap = 400 * 10**18;
+    //uint256 public cap = 10 * 10**18;
     event CapReached(uint256 weiRaised, uint256 value);
     event TokenMintReached(uint256 tokenRaised, uint256 amountToken);
 
     function Crowdsale(uint256 _startTime, uint256 _endTime, address _wallet) public {
-
         require(_startTime >= now);
         require(_endTime >= _startTime);
         require(_wallet != address(0));
@@ -382,9 +382,8 @@ contract SXTCrowdsale is Ownable, Crowdsale, MintableToken {
 
     function getTotalAmountOfTokens(uint256 _weiAmount) internal constant returns (uint256 amountOfTokens) {
         uint256 currentTokenRate = 0;
-        //uint256 currentDate = now;
-        uint256 currentDate = 1518307199; // 10 Feb 2018
-        //uint256 currentDate =  1519603499; // 26 Feb 2018
+        uint256 currentDate = now;
+        //uint256 currentDate = 1518307199; // 10 Feb 2018
         require(currentDate >= startTime);
 
         if (currentDate >= startTime && currentDate < endTimeStageOne) {

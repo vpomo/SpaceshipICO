@@ -8,6 +8,7 @@ contract('SXTCrowdsale', (accounts) => {
     var rateNew = 13000;
     var buyWeiNew = 5 * 10**17;
     var totalSupply = 5 * 10**24;
+    var buyWeiCap = 20 * 10**18;
 
     it('should deployed contract', async ()  => {
         assert.equal(undefined, contract);
@@ -32,8 +33,7 @@ contract('SXTCrowdsale', (accounts) => {
         var weiRaisedBefore = await contract.weiRaised.call();
         //console.log("tokenAllocated = " + tokenAllocatedBefore);
 
-        await contract.buyTokens(accounts[2],{from:accounts[2], value:buyWei});
-
+        await contract.buyTokens(accounts[2],{from:accounts[2], value:buyWei});1
         var tokenAllocatedAfter = await contract.tokenAllocated.call();
         //console.log("tokenAllocatedAfter = " + tokenAllocatedAfter);
         assert.isTrue(tokenAllocatedBefore < tokenAllocatedAfter);
@@ -76,8 +76,13 @@ contract('SXTCrowdsale', (accounts) => {
     it('verification cap reached', async ()  => {
             var weiRaisedBefore = await contract.weiRaised.call();
             assert.equal(buyWei + buyWeiNew, weiRaisedBefore);
-
-            //await contract.close({from:accounts[0]});
+            var balanceAccountOneBefore = await contract.balanceOf(accounts[1]);
+            await contract.buyTokens(accounts[1],{from:accounts[1], value:buyWeiCap});
+            var balanceAccountOneAfter = await contract.balanceOf(accounts[1]);
+            assert.isTrue(balanceAccountOneBefore < balanceAccountOneAfter);
+            assert.equal(0, balanceAccountOneBefore);
+            console.log("balanceAccountOneAfter = " + balanceAccountOneAfter);
+            assert.equal(rate*buyWeiCap, balanceAccountOneAfter);
 
     });
 
