@@ -288,9 +288,6 @@ contract Crowdsale is Ownable  {
     uint256 public weiRaised;
     uint256 public tokenAllocated;
 	uint256 public cap = 400 * 10**18;
-    //uint256 public cap = 10 * 10**18;
-    event CapReached(uint256 weiRaised, uint256 value);
-    event TokenMintReached(uint256 tokenRaised, uint256 amountToken);
 
     function Crowdsale(uint256 _startTime, uint256 _endTime, address _wallet) public {
         require(_startTime >= now);
@@ -301,24 +298,6 @@ contract Crowdsale is Ownable  {
         endTimeStageOne = _endTime;
         wallet = _wallet;
     }
-
-    function hasEnded() internal view returns (bool) {
-        bool capReached = weiRaised >= cap;
-        return capReached;
-    }
-
-    function validPurchase(uint256 _amountToken, uint256 _tokenReached) internal returns (bool) {
-        if(tokenAllocated.add(_amountToken) >= _tokenReached){
-            TokenMintReached(tokenAllocated,_amountToken);
-            return false;
-        }
-        if(weiRaised.add(msg.value) >= cap){
-            CapReached(weiRaised, msg.value);
-            return false;
-        }
-        return true;
-    }
-
 }
 
 
@@ -335,6 +314,8 @@ contract SXTCrowdsale is Ownable, Crowdsale, MintableToken {
     uint256 public countInvestor;
 
     event TokenPurchase(address indexed beneficiary, uint256 value, uint256 amount);
+    event CapReached(uint256 weiRaised, uint256 value);
+    event TokenMintReached(uint256 tokenRaised, uint256 amountToken);
 
     function SXTCrowdsale(uint256 _startTime, uint256 _endTime, address _wallet) public
     Crowdsale(_startTime, _endTime, _wallet)
@@ -361,9 +342,9 @@ contract SXTCrowdsale is Ownable, Crowdsale, MintableToken {
         require(_investor != address(0));
         uint256 weiAmount = msg.value;
         // calculate token amount to be created
-        uint256 tokens = getTotalAmountOfTokens(weiAmount);
+        uint256 tokens = validPurchaseTokens(weiAmount);
 
-        if(!validPurchase(tokens, tokenCapReached)){
+        if(tokens == 0){
             revert();
         }
 
@@ -409,6 +390,19 @@ contract SXTCrowdsale is Ownable, Crowdsale, MintableToken {
 
     function getDeposited(address _investor) public view returns (uint256){
         return deposited[_investor];
+    }
+
+    function validPurchaseTokens(uint256 _weiAmount) public returns (uint256) {
+        uint256 tokens = getTotalAmountOfTokens(_weiAmount);
+        if(tokenAllocated.add(tokens) >= tokenCapReached){
+            TokenMintReached(tokenAllocated, tokens);
+            return 0;
+        }
+        if(weiRaised.add(_weiAmount) >= cap){
+            CapReached(weiRaised, _weiAmount);
+            return 0;
+        }
+        return tokens;
     }
 
 }
